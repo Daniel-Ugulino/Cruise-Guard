@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
 from keras.models import load_model
-import serial
+import os
 
-# cam_port = 1
-# cam = cv2.VideoCapture(cam_port) 
+testPath = "./tests/"
+model = load_model('./modelo85_v5.h5')
 
 
 def preprocessing(img):
@@ -13,7 +13,7 @@ def preprocessing(img):
     img = img/255            # normalizar valores para 0 e 1 em vez de 0 e 255
     return img
 
-def class_detector(img):
+def class_detector(img, img_name):
     # Dados da imagem
     classe = -1
     img = cv2.resize(img,(64,64))
@@ -23,7 +23,7 @@ def class_detector(img):
     indexVal = np.argmax(resultado)
     probabilidade = resultado[0, indexVal]
 
-    if(probabilidade >= 0.70):
+    if(probabilidade >= 0.50):
         classe = indexVal
     
     if classe == 0:
@@ -53,37 +53,9 @@ def class_detector(img):
     else:
         placa = "N"
         signal = "N"
-    print(placa)
+    print(str(classe) + " placa:" + placa + " arquivo:" + str(img_name))
     return signal
 
-model = load_model('./classification/modelo85_v5_best_best.h5')
-custom_cascade = cv2.CascadeClassifier("./cascade_trafic/cascade/cascade.xml")
-cam = cv2.VideoCapture(0)
-trafic_sign = []
-last_signal = 'N'
-
-# Mostrar a imagem
-esp = serial.Serial("COM5", 9600)
-img = cv2.imread('C:/Users/Daniel/Desktop/projeto_PB/test_img.jpg')
-while True:
-    ret, img = cam.read()
-    objects = custom_cascade.detectMultiScale(img, minSize=(24, 24))
-    trafic_sign = []
-    for (x, y, w, h) in objects:
-        cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        trafic_sign = img[y:y+h, x:x+w]
-
-    if(len(trafic_sign) > 1):
-        signal = class_detector(trafic_sign)
-        if(last_signal != signal):
-            last_signal = signal
-            esp.write((signal).encode())
-
-    cv2.imshow('Object Detection', img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cam.release()
-cv2.destroyAllWindows()
-
-
+for img in os.listdir(testPath):
+    Img = cv2.imread("./tests/"+img)
+    class_detector(Img, img)

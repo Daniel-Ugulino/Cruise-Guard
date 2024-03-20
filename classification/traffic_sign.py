@@ -47,8 +47,8 @@ arrayImg = np.asarray(L_Img)
 arrayClasses = np.asarray(L_Cls)
 arrayImg = arrayImg.reshape(arrayImg.shape[0], arrayImg.shape[1], arrayImg.shape[2], 1)
 
-X_train, X_test, y_train, y_test = train_test_split(arrayImg, arrayClasses, test_size=0.2)
-X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(arrayImg, arrayClasses, test_size=0.2,shuffle=True)
+X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.2,shuffle=True)
 
 dataGen= ImageDataGenerator(width_shift_range=0.1,   
                             height_shift_range=0.1,
@@ -56,7 +56,7 @@ dataGen= ImageDataGenerator(width_shift_range=0.1,
                             shear_range=0.1,  
                             rotation_range=10)  
 dataGen.fit(X_train)
-batches= dataGen.flow(X_train,y_train,batch_size=40)
+batches= dataGen.flow(X_train,y_train,batch_size=200)
 
 y_train = to_categorical(y_train, len(trainDir))
 y_test = to_categorical(y_test,len(trainDir))
@@ -90,7 +90,7 @@ Cmd_MP3= MaxPooling2D(pool_size= (2,2))
 RNC.add(Cmd_MP3)
 
 # 4a camada de convolução
-Cmd_C4= Conv2D(128,kernel_size= (3,3),strides= (1,1),activation= 'relu')
+Cmd_C4= Conv2D(64,kernel_size= (3,3),strides= (1,1),activation= 'relu')
 RNC.add(Cmd_C4)
 RNC.add(BatchNormalization())
 Cmd_MP4 = MaxPooling2D(pool_size= (2,2))
@@ -100,11 +100,11 @@ RNC.add(Cmd_MP4)
 RNC.add(Flatten())
 
 # 1a Camada oculta 
-RNC.add(Dense(units= 64,activation= 'relu'))
+RNC.add(Dense(units= 32,activation= 'relu'))
 RNC.add(Dropout(0.5))
 
 # 2a Camada oculta 
-# RNC.add(Dense(units= 64,activation= 'relu'))
+# RNC.add(Dense(units= 32,activation= 'relu'))
 # RNC.add(Dropout(0.5))
 
 # Camada de saída
@@ -115,12 +115,12 @@ RNC.compile(loss='categorical_crossentropy',optimizer= 'adam',metrics= ['accurac
 
 # Treinamento da rede
 print(RNC.summary())
-history = RNC.fit(X_train,y_train,epochs = 50,validation_data=(X_validation,y_validation), shuffle=1)
-# history= RNC.fit_generator(dataGen.flow(X_train,y_train),epochs=20,validation_data=(X_validation,y_validation),shuffle=1)
+# history = RNC.fit(X_train,y_train,epochs = 150,validation_data=(X_validation,y_validation), shuffle=1)
+history = RNC.fit(dataGen.flow(X_train,y_train),epochs=85,validation_data=(X_validation,y_validation),shuffle=1)
 
 score = RNC.evaluate(X_test,y_test,verbose=0)
 print('Test Score:',score[0])
 print('Test Accuracy:',score[1])
 
-RNC.save('modelo20_v3_1.h5')
+RNC.save('modelo85_v5.h5')
 print('Modelo Salvo!')
