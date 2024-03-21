@@ -23,7 +23,7 @@ def class_detector(img):
     indexVal = np.argmax(resultado)
     probabilidade = resultado[0, indexVal]
 
-    if(probabilidade >= 0.70):
+    if(probabilidade >= 0.80):
         classe = indexVal
     
     if classe == 0:
@@ -57,13 +57,13 @@ def class_detector(img):
     return signal
 
 model = load_model('./classification/modelo85_v5_best_best.h5')
-custom_cascade = cv2.CascadeClassifier("./cascade_trafic/cascade/cascade.xml")
+custom_cascade = cv2.CascadeClassifier("./cascade_trafic/cascade2/cascade.xml")
 cam = cv2.VideoCapture(0)
 trafic_sign = []
 last_signal = 'N'
 
 # Mostrar a imagem
-esp = serial.Serial("COM5", 9600)
+# esp = serial.Serial("COM5", 9600)
 img = cv2.imread('C:/Users/Daniel/Desktop/projeto_PB/test_img.jpg')
 while True:
     ret, img = cam.read()
@@ -77,8 +77,9 @@ while True:
         signal = class_detector(trafic_sign)
         if(last_signal != signal):
             last_signal = signal
-            esp.write((signal).encode())
+            # esp.write((signal).encode())
 
+    print(last_signal)
     cv2.imshow('Object Detection', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
