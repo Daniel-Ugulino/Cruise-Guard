@@ -57,7 +57,7 @@ def class_detector(img):
     return signal
 
 model = load_model('./classification/modelo85_v5_best_best.h5')
-custom_cascade = cv2.CascadeClassifier("./cascade_trafic/cascade2/cascade.xml")
+custom_cascade = cv2.CascadeClassifier("./cascade_trafic/cascade/cascade.xml")
 cam = cv2.VideoCapture(0)
 trafic_sign = []
 last_signal = 'N'
