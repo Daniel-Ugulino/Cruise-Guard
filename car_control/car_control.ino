@@ -1,3 +1,9 @@
+// This example code is in the Public Domain (or CC0 licensed, at your option.)
+// By Evandro Copercini - 2018
+//
+// This example creates a bridge between Serial and Classical Bluetooth (SPP)
+// and also demonstrate that SerialBT have the same functionalities of a normal Serial
+
 #include "BluetoothSerial.h"
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
@@ -51,8 +57,8 @@ void loop()
   float distancia = distance_sensor();
   Serial.println(distancia);
 
-  if (distancia >= 45)
-  {
+  // if (distancia >= 45)
+  // {
     if (SerialBT.available())
     {
       control = (char)SerialBT.read();
@@ -61,32 +67,32 @@ void loop()
 
     if (control == '1')
     {
-      speedMa = 10;
-      speedMb = 32;
+      speedMa = 30;
+      speedMb = 42;
       controleVelocidade();
     }
     else if (control == '2')
     {
-      speedMa = 36;
-      speedMb = 42;
+      speedMa = 40;
+      speedMb = 52;
       controleVelocidade();
     }
     else if (control == '3')
     {
-      speedMa = 46;
-      speedMb = 52;
+      speedMa = 50;
+      speedMb = 62;
       controleVelocidade();
     }
     else if (control == '4')
     {
-      speedMa = 56;
-      speedMb = 62;
+      speedMa = 60;
+      speedMb = 72;
       controleVelocidade();
     }
     else if (control == '5')
     {
-      speedMa = 66;
-      speedMb = 72;
+      speedMa = 70;
+      speedMb = 82;
       controleVelocidade();
     }
     else if (control == 'P')
@@ -103,11 +109,11 @@ void loop()
     {
       controleDirecao(2);
     }
-  }
-  else if (distancia <= 45)
-  {
-    stop();
-  }
+  // }
+  // else if (distancia <= 45)
+  // {
+  //   stop();
+  // }
 
   delay(20);
 }
