@@ -11,7 +11,7 @@
 #endif
 #define VELOCIDADE_DO_SOM 0.034 // definir a velocidade do som em cm/uS
 #define CM_PARA_POLEGADA 0.393701
-
+#define DIST_LIM 40
 BluetoothSerial SerialBT;
 
 const int pin_ena = 4;
@@ -25,10 +25,10 @@ const int pin_in4 = 25;
 const int trigPin = 22;
 const int echoPin = 23;
 
-int speedMa = 0;
-int speedMb = 0;
+float speedMa = 0;
+float speedMb = 0;
 
-char last_control;
+char last_control = 'N';
 
 long duracao;
 float distancCm;
@@ -57,46 +57,54 @@ void loop()
   float distancia = distance_sensor();
   Serial.println(distancia);
 
-  // if (distancia >= 45)
-  // {
+  if (distancia >= DIST_LIM)
+  {
     if (SerialBT.available())
     {
       control = (char)SerialBT.read();
-      Serial.write(control);
+      if(control != ' '){
+        last_control = control;
+      }
     }
 
     if (control == '1')
     {
-      speedMa = 30;
-      speedMb = 42;
+      startEngine();
+      speedMa = 13.5;
+      speedMb = 14;
       controleVelocidade();
     }
     else if (control == '2')
     {
-      speedMa = 40;
-      speedMb = 52;
+      startEngine();
+      speedMa = 15.5;
+      speedMb = 16;
       controleVelocidade();
     }
     else if (control == '3')
     {
-      speedMa = 50;
-      speedMb = 62;
+      startEngine();
+      speedMa = 17.5;
+      speedMb = 18;
       controleVelocidade();
     }
     else if (control == '4')
     {
-      speedMa = 60;
-      speedMb = 72;
+      startEngine();
+      speedMa = 19.5;
+      speedMb = 21;
       controleVelocidade();
     }
     else if (control == '5')
     {
-      speedMa = 70;
-      speedMb = 82;
+      startEngine();
+      speedMa = 23;
+      speedMb = 23;
       controleVelocidade();
     }
     else if (control == 'P')
     {
+      startEngine();
       speedMa = 0;
       speedMb = 0;
       stop();
@@ -109,13 +117,34 @@ void loop()
     {
       controleDirecao(2);
     }
-  // }
-  // else if (distancia <= 45)
-  // {
-  //   stop();
-  // }
-
-  delay(20);
+  }
+  else if (distancia <= DIST_LIM)
+  {
+    stop();
+    if(last_control != ' ' && last_control != 'N' && last_control != 'P' && last_control != 'D'  && last_control != 'L')
+    {
+      while (distancia <= DIST_LIM){
+        control = (char)SerialBT.read();
+        if(control == 'P'){
+          stop();
+          break;
+        }
+        else{
+          rotate();
+          distancia = distance_sensor();
+          delay(1000);
+          if(distancia >= DIST_LIM){
+            startEngine();
+            speedMa = 14.5;
+            speedMb = 15;
+            controleVelocidade();
+            break;
+          }
+        }
+      }
+    }
+  }
+  delay(200);
 }
 
 float distance_sensor()
@@ -135,6 +164,16 @@ float distance_sensor()
   return distancCm;
 }
 
+void startEngine(){
+    analogWrite(pin_enb, 50);
+    analogWrite(pin_ena, 50);
+    digitalWrite(pin_in1, HIGH);
+    digitalWrite(pin_in2, LOW);
+    digitalWrite(pin_in3, HIGH);
+    digitalWrite(pin_in4, LOW);
+    delay(50);
+}
+
 void controleVelocidade()
 {
   Serial.println("Moving Forward");
@@ -148,9 +187,11 @@ void controleVelocidade()
 
 void controleDirecao(int direcao)
 {
+  startEngine();
+  analogWrite(pin_ena, 16.5);
+  analogWrite(pin_enb, 17);
   if (direcao == 1)
   {
-    Serial.println("Direita");
     digitalWrite(pin_in1, HIGH);
     digitalWrite(pin_in2, LOW);
     digitalWrite(pin_in3, LOW);
@@ -158,29 +199,38 @@ void controleDirecao(int direcao)
   }
   if (direcao == 2)
   {
-    Serial.println("Esquerda");
     digitalWrite(pin_in1, LOW);
     digitalWrite(pin_in2, LOW);
     digitalWrite(pin_in3, HIGH);
     digitalWrite(pin_in4, LOW);
   }
   delay(1000);
+  analogWrite(pin_ena, speedMa);
+  analogWrite(pin_enb, speedMb);
   digitalWrite(pin_in1, HIGH);
   digitalWrite(pin_in2, LOW);
   digitalWrite(pin_in3, HIGH);
   digitalWrite(pin_in4, LOW);
-  delay(2000);
+  delay(1000);
 }
 
 void stop()
 {
   // Stop the DC motor
   Serial.println("Motor stopped");
-
-  analogWrite(pin_enb, speedMb);
-  analogWrite(pin_ena, speedMa);
   digitalWrite(pin_in1, LOW);
   digitalWrite(pin_in2, LOW);
   digitalWrite(pin_in3, LOW);
   digitalWrite(pin_in4, LOW);
+}
+
+void rotate(){
+  startEngine();
+  digitalWrite(pin_in1, HIGH);
+  digitalWrite(pin_in2, LOW);
+  digitalWrite(pin_in3, LOW);
+  digitalWrite(pin_in4, LOW);
+  analogWrite(pin_ena, 13);
+
+  delay(500);
 }

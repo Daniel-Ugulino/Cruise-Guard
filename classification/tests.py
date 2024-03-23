@@ -23,7 +23,7 @@ def class_detector(img, img_name):
     indexVal = np.argmax(resultado)
     probabilidade = resultado[0, indexVal]
 
-    if(probabilidade >= 0.50):
+    if(probabilidade >= 0.90):
         classe = indexVal
     
     if classe == 0:
