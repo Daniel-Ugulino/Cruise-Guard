@@ -59,11 +59,9 @@ void loop()
   if (SerialBT.available())
   {
     control = (char)SerialBT.read();
-    Serial.println(SerialBT.read());
 
     if (SerialBT.read() != -1)
     {
-      Serial.println(-1);
       last_control = control;
     }
   }
@@ -82,7 +80,7 @@ void loop()
       break;
     case '3':
       startEngine();
-      controleVelocidade(18.5, 19);
+      controleVelocidade(18, 19);
       break;
     case '4':
       startEngine();
@@ -106,16 +104,14 @@ void loop()
   else if (distancia <= DIST_LIM)
   {
     stop();
-    if (last_control != 'N' && last_control != 'P' && last_control != 'D' && last_control != 'L')
+    if (last_control != 'N' && last_control != 'P')
     {
       while (distancia <= DIST_LIM)
       {
-        Serial.println('rotate');
         control = (char)SerialBT.read();
         if (control == 'P')
         {
           last_control = 'P';
-          Serial.println(last_control);
           stop();
           break;
         }
@@ -133,7 +129,6 @@ void loop()
       }
     }
   }
-  delay(1000);
 }
 
 float distance_sensor()
@@ -197,13 +192,13 @@ void controleDirecao(int direcao)
     digitalWrite(pin_in4, LOW);
   }
   delay(1000);
+  startEngine();
   analogWrite(pin_ena, speedMa);
   analogWrite(pin_enb, speedMb);
   digitalWrite(pin_in1, HIGH);
   digitalWrite(pin_in2, LOW);
   digitalWrite(pin_in3, HIGH);
   digitalWrite(pin_in4, LOW);
-  delay(1000);
 }
 
 void stop()
