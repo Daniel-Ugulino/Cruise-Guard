@@ -18,38 +18,27 @@ def class_detector(img):
     resultado = model.predict(img)
     indexVal = np.argmax(resultado)
     probabilidade = resultado[0, indexVal]
-
+    signal = "N"
+    
     if(probabilidade >= 0.90):
         classe = indexVal
     
     if classe == 0:
-        placa = "20km"
-        signal = "1"
+        signal = "1" #20km
     elif classe == 2:
-        placa = "30km"
-        signal = "2"
+        signal = "2" #30km
     elif classe == 1:
-        placa = "70km"
-        signal = "3"
+        signal = "3" #70km
     elif classe == 3:
-        placa = "80km"
-        signal = "4"
+        signal = "4" #80km
     elif classe == 4:
-        placa = "120km"
-        signal = "5"
+        signal = "5" #120km
     elif classe == 5:
-        placa = "Stop"
-        signal = "P"
+        signal = "P"  #Stop
     elif classe == 6:
-        placa = "Esquerda"
-        signal = "L"
+        signal = "L" #Esquerda
     elif classe == 7:
-        placa = "Direita"
-        signal = "D"
-    else:
-        placa = "N"
-        signal = "N"
-    print(placa)
+        signal = "D" #Direita
     return signal
 
 model = load_model('./classification/modelo85_v5_best_best.h5')
@@ -59,7 +48,6 @@ trafic_sign = []
 last_signal = 'N'
 
 esp = serial.Serial("COM5", 9600)
-img = cv2.imread('C:/Users/Daniel/Desktop/projeto_PB/test_img.jpg')
 while True:
     ret, img = cam.read()
     objects = custom_cascade.detectMultiScale(img, minSize=(24, 24))
@@ -70,16 +58,14 @@ while True:
 
     if(len(trafic_sign) > 1):
         signal = class_detector(trafic_sign)
-        if(last_signal != signal):
+        if(last_signal != signal and signal != "N"):
             last_signal = signal
+            print(last_signal)
             esp.write((signal).encode())
 
-    print(last_signal)
     cv2.imshow('Object Detection', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cam.release()
 cv2.destroyAllWindows()
-
-
