@@ -55,96 +55,85 @@ void loop()
 {
   char control = 'N';
   float distancia = distance_sensor();
-  Serial.println(distancia);
+
+  if (SerialBT.available())
+  {
+    control = (char)SerialBT.read();
+    Serial.println(SerialBT.read());
+
+    if (SerialBT.read() != -1)
+    {
+      Serial.println(-1);
+      last_control = control;
+    }
+  }
 
   if (distancia >= DIST_LIM)
   {
-    if (SerialBT.available())
+    switch (control)
     {
-      control = (char)SerialBT.read();
-      if(control != ' '){
-        last_control = control;
-      }
-    }
-
-    if (control == '1')
-    {
+    case '1':
       startEngine();
-      speedMa = 13.5;
-      speedMb = 14;
-      controleVelocidade();
-    }
-    else if (control == '2')
-    {
+      controleVelocidade(14.5, 15);
+      break;
+    case '2':
       startEngine();
-      speedMa = 15.5;
-      speedMb = 16;
-      controleVelocidade();
-    }
-    else if (control == '3')
-    {
+      controleVelocidade(16.5, 17);
+      break;
+    case '3':
       startEngine();
-      speedMa = 17.5;
-      speedMb = 18;
-      controleVelocidade();
-    }
-    else if (control == '4')
-    {
+      controleVelocidade(18.5, 19);
+      break;
+    case '4':
       startEngine();
-      speedMa = 19.5;
-      speedMb = 21;
-      controleVelocidade();
-    }
-    else if (control == '5')
-    {
+      controleVelocidade(20.5, 22);
+      break;
+    case '5':
       startEngine();
-      speedMa = 23;
-      speedMb = 23;
-      controleVelocidade();
-    }
-    else if (control == 'P')
-    {
-      startEngine();
-      speedMa = 0;
-      speedMb = 0;
+      controleVelocidade(25, 25);
+      break;
+    case 'P':
       stop();
-    }
-    else if (control == 'D')
-    {
+      break;
+    case 'D':
       controleDirecao(1);
-    }
-    else if (control == 'L')
-    {
+      break;
+    case 'L':
       controleDirecao(2);
+      break;
     }
   }
   else if (distancia <= DIST_LIM)
   {
     stop();
-    if(last_control != ' ' && last_control != 'N' && last_control != 'P' && last_control != 'D'  && last_control != 'L')
+    if (last_control != 'N' && last_control != 'P' && last_control != 'D' && last_control != 'L')
     {
-      while (distancia <= DIST_LIM){
+      while (distancia <= DIST_LIM)
+      {
+        Serial.println('rotate');
         control = (char)SerialBT.read();
-        if(control == 'P'){
+        if (control == 'P')
+        {
+          last_control = 'P';
+          Serial.println(last_control);
           stop();
           break;
         }
-        else{
+        else
+        {
           rotate();
           distancia = distance_sensor();
-          delay(1000);
-          if(distancia >= DIST_LIM){
+          if (distancia >= DIST_LIM)
+          {
             startEngine();
-            speedMa = 14.5;
-            speedMb = 15;
-            controleVelocidade();
+            controleVelocidade(14.5, 15);
             break;
           }
         }
       }
     }
   }
-  delay(200);
+  delay(1000);
 }
 
 float distance_sensor()
@@ -164,19 +153,22 @@ float distance_sensor()
   return distancCm;
 }
 
-void startEngine(){
-    analogWrite(pin_enb, 50);
-    analogWrite(pin_ena, 50);
-    digitalWrite(pin_in1, HIGH);
-    digitalWrite(pin_in2, LOW);
-    digitalWrite(pin_in3, HIGH);
-    digitalWrite(pin_in4, LOW);
-    delay(50);
+void startEngine()
+{
+  analogWrite(pin_enb, 50);
+  analogWrite(pin_ena, 50);
+  digitalWrite(pin_in1, HIGH);
+  digitalWrite(pin_in2, LOW);
+  digitalWrite(pin_in3, HIGH);
+  digitalWrite(pin_in4, LOW);
+  delay(50);
 }
 
-void controleVelocidade()
+void controleVelocidade(float Ma, float Mb)
 {
   Serial.println("Moving Forward");
+  speedMa = Ma;
+  speedMb = Mb;
   analogWrite(pin_enb, speedMb);
   analogWrite(pin_ena, speedMa);
   digitalWrite(pin_in1, HIGH);
@@ -224,13 +216,13 @@ void stop()
   digitalWrite(pin_in4, LOW);
 }
 
-void rotate(){
+void rotate()
+{
   startEngine();
   digitalWrite(pin_in1, HIGH);
   digitalWrite(pin_in2, LOW);
   digitalWrite(pin_in3, LOW);
   digitalWrite(pin_in4, LOW);
   analogWrite(pin_ena, 13);
-
   delay(500);
 }

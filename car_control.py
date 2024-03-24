@@ -3,10 +3,6 @@ import numpy as np
 from keras.models import load_model
 import serial
 
-# cam_port = 1
-# cam = cv2.VideoCapture(cam_port) 
-
-
 def preprocessing(img):
     img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)   # Converter em Gray
     img = cv2.equalizeHist(img)   # Padronizar a Luminosidade das imagens
@@ -23,7 +19,7 @@ def class_detector(img):
     indexVal = np.argmax(resultado)
     probabilidade = resultado[0, indexVal]
 
-    if(probabilidade >= 0.80):
+    if(probabilidade >= 0.90):
         classe = indexVal
     
     if classe == 0:
@@ -62,8 +58,7 @@ cam = cv2.VideoCapture(0)
 trafic_sign = []
 last_signal = 'N'
 
-# Mostrar a imagem
-# esp = serial.Serial("COM5", 9600)
+esp = serial.Serial("COM5", 9600)
 img = cv2.imread('C:/Users/Daniel/Desktop/projeto_PB/test_img.jpg')
 while True:
     ret, img = cam.read()
@@ -77,7 +72,7 @@ while True:
         signal = class_detector(trafic_sign)
         if(last_signal != signal):
             last_signal = signal
-            # esp.write((signal).encode())
+            esp.write((signal).encode())
 
     print(last_signal)
     cv2.imshow('Object Detection', img)
