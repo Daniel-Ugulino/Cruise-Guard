@@ -21,7 +21,7 @@ def class_detector(img):
 
     if(probabilidade >= 0.90):
         classe = indexVal
-    
+    signal = "N"
     if classe == 0:
         placa = "20km"
         signal = "1"
@@ -48,8 +48,6 @@ def class_detector(img):
         signal = "D"
     else:
         placa = "N"
-        signal = "N"
-    print(placa)
     return signal
 
 model = load_model('./classification/modelo85_v5_best_best.h5')
@@ -70,11 +68,10 @@ while True:
 
     if(len(trafic_sign) > 1):
         signal = class_detector(trafic_sign)
-        if(last_signal != signal):
+        if(last_signal != signal and signal != "N"):
             last_signal = signal
+            print(last_signal)
             esp.write((signal).encode())
-
-    print(last_signal)
     cv2.imshow('Object Detection', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
