@@ -55,15 +55,10 @@ void loop()
 {
   char control = 'N';
   float distancia = distance_sensor();
-
+  Serial.println(last_control);
   if (SerialBT.available())
   {
-    control = (char)SerialBT.read();
-
-    if (SerialBT.read() != -1)
-    {
-      last_control = control;
-    }
+    control = SerialBT.read();
   }
 
   if (distancia >= DIST_LIM)
@@ -72,7 +67,7 @@ void loop()
     {
     case '1':
       startEngine();
-      controleVelocidade(14.5, 15);
+      controleVelocidade(15, 15);
       break;
     case '2':
       startEngine();
@@ -108,10 +103,13 @@ void loop()
     {
       while (distancia <= DIST_LIM)
       {
+        delay(500);
         control = (char)SerialBT.read();
-        if (control == 'P')
+        if(SerialBT.read() != -1){
+          break;
+        }
+        else if (control == 'P')
         {
-          last_control = 'P';
           stop();
           break;
         }
@@ -122,12 +120,17 @@ void loop()
           if (distancia >= DIST_LIM)
           {
             startEngine();
-            controleVelocidade(14.5, 15);
+            controleVelocidade(speedMa, speedMb);
             break;
           }
         }
       }
     }
+  }
+
+  if (SerialBT.read() != -1 && control != 'N')
+  {
+    last_control = (char)control;
   }
 }
 
