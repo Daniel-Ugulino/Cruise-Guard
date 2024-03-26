@@ -4,7 +4,7 @@ from keras.models import load_model
 import os
 
 testPath = "./tests/"
-model = load_model('./modelo85_v5_best_best.h5')
+model = load_model('./modelo85_v5_test.h5')
 
 
 def preprocessing(img):

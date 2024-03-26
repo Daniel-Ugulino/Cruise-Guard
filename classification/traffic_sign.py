@@ -12,6 +12,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout, BatchNormalization
 from keras.utils import to_categorical
 from keras.src.legacy.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
 
 trainPath = "./train/"
 trainDir = os.listdir(trainPath)
@@ -122,5 +123,14 @@ score = RNC.evaluate(X_test,y_test,verbose=0)
 print('Test Score:',score[0])
 print('Test Accuracy:',score[1])
 
-RNC.save('modelo85_v5.h5')
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.legend(['training', 'validation'])
+plt.title('Loss')
+plt.xlabel('Epoch')
+
+RNC.save('modelo85_v5_test.h5')
 print('Modelo Salvo!')
+
+plt.ioff()
+plt.show()

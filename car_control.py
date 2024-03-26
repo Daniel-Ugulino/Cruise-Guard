@@ -41,7 +41,10 @@ def class_detector(img):
         signal = "D" #Direita
     return signal
 
-model = load_model('./classification/modelo85_v5_best_best.h5')
+# model = load_model('./classification/modelo85_v5_best_best.h5')
+# model = load_model('./classification/modelo30_v5.h5')
+model = load_model('./classification/modelo85_v5_test.h5')
+
 custom_cascade = cv2.CascadeClassifier("./cascade_trafic/cascade/cascade.xml")
 cam = cv2.VideoCapture(0)
 trafic_sign = []
@@ -50,7 +53,9 @@ last_signal = 'N'
 esp = serial.Serial("COM5", 9600)
 while True:
     ret, img = cam.read()
-    objects = custom_cascade.detectMultiScale(img, minSize=(24, 24))
+    img_A = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)   # Converter em Gray
+    img_A = cv2.equalizeHist(img_A)   # Padronizar a Luminosidade das imagens
+    objects = custom_cascade.detectMultiScale(img_A, minSize=(32, 32),minNeighbors=5,scaleFactor=1.03)
     trafic_sign = []
     for (x, y, w, h) in objects:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
@@ -65,6 +70,8 @@ while True:
 
     cv2.imshow('Object Detection', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
+        cam.release()
+        cv2.destroyAllWindows()
         break
 
 cam.release()

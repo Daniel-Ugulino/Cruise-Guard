@@ -34,3 +34,7 @@ while True:
 # Release the capture
 cap.release()
 cv2.destroyAllWindows()
+
+# C:/Users/Daniel/Desktop/openCv/opencv/build/x64/vc15/bin/opencv_createsamples.exe -info pos.txt -w 42 -h 42 -num 500 -vec pos2.vec
+
+# C:/Users/Daniel/Desktop/openCv/opencv/build/x64/vc15/bin/opencv_traincascade.exe -data cascade2/ -vec pos2.vec -bg neg.txt -precalcValBufSize 6000 -precalcIdxBufSize 6000 -numPos 500 -numNeg 700 -numStages 11 -w 32 -h 32 -maxFalseAlarmRate 0.2 -minHitRate 0.999
