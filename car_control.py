@@ -4,6 +4,12 @@ from keras.models import load_model
 import serial
 import time
 
+def check_connection(esp):
+    try:
+        esp.write(("T").encode())
+        return True
+    except serial.SerialTimeoutException:
+        return False
 
 def open_cam(port):
     print("Opening camera")
@@ -29,7 +35,7 @@ def load_models():
 def esp_connection():
     print("Connecting to EPS32")
     try:
-        esp = serial.Serial("COM5", 9600, timeout=20)
+        esp = serial.Serial("COM5", 9600, timeout=20, write_timeout=15)
         print("Connected")
         return esp
     except serial.SerialException as e:
@@ -99,14 +105,14 @@ if __name__ == "__main__":
                 if(last_signal != signal and signal != "N" or signal == "P"):
                     trafic_sign_text = detector[1]
                     last_signal = signal
-                    if(esp and esp.is_open()):
+                    if(esp and check_connection()):
                         esp.write((signal).encode())
                     else:
                         esp = False
 
             img = cv2.putText(img, trafic_sign_text, (250, 100) , cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0) , 2, cv2.LINE_AA) 
 
-            if(not esp and (current_time - start_time >= 30)):
+            if((not esp or check_connection()) and (current_time - start_time >= 30)):
                 esp = esp_connection()
                 start_time = time.time()
 
