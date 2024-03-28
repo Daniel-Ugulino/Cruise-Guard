@@ -26,6 +26,7 @@ def load_models():
      
 def esp_connection():
     try:
+        print("Connecting to EPS32")
         esp = serial.Serial("COM5", 9600, timeout=20)
         print("Connected")
         return esp
