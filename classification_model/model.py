@@ -1,9 +1,3 @@
-# Nome: daniel_ugulino_DR2_AT_Q3.py
-# Função: Rede neural convolucional  para classificação de imagens dos personagens Bart e Homer
-# Data: 11/12/2023
-
-# Importações
-
 import numpy as np
 import os
 import cv2
@@ -22,7 +16,6 @@ L_Cls = []
 OriginalImgs = []
 
 # Definição do tamanho padrão das imagens
-
 nL= 64
 nC= 64
 
@@ -65,7 +58,7 @@ y_validation = to_categorical(y_validation,len(trainDir))
 
 RNC = Sequential()
 # 1a camada de convolução 
-Cmd_C1= Conv2D(128,        # número de detectores de características
+Cmd_C1= Conv2D(32,        # número de detectores de características
         kernel_size= (5,5), # ordem dos kernels dos detectores
         strides= (1,1),      # deslocamento da janela
         input_shape= [nL,nC,1], # shape da figura
@@ -104,10 +97,6 @@ RNC.add(Flatten())
 RNC.add(Dense(units= 32,activation= 'relu'))
 RNC.add(Dropout(0.5))
 
-# 2a Camada oculta 
-# RNC.add(Dense(units= 32,activation= 'relu'))
-# RNC.add(Dropout(0.5))
-
 # Camada de saída
 RNC.add(Dense(units= 8, activation= 'softmax')) # 1 classe
 
@@ -116,7 +105,6 @@ RNC.compile(loss='categorical_crossentropy',optimizer= 'adam',metrics= ['accurac
 
 # Treinamento da rede
 print(RNC.summary())
-# history = RNC.fit(X_train,y_train,epochs = 150,validation_data=(X_validation,y_validation), shuffle=1)
 history = RNC.fit(dataGen.flow(X_train,y_train),epochs=85,validation_data=(X_validation,y_validation),shuffle=1)
 
 score = RNC.evaluate(X_test,y_test,verbose=0)

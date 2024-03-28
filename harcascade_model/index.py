@@ -1,7 +1,7 @@
 import cv2
 
 # Load your custom cascade classifier
-custom_cascade = cv2.CascadeClassifier("./cascade_trafic/cascade/cascade.xml")
+custom_cascade = cv2.CascadeClassifier("./cascade/cascade.xml")
 
 # Initialize the webcam
 cap = cv2.VideoCapture(0)

@@ -3,3 +3,4 @@ harcascade_model/datasets/neg
 harcascade_model/datasets/pos
 harcascade_model/datasets/*.rar
 opencv
+*rar

@@ -7,6 +7,7 @@ model = load_model('./classification_model/traffic_sign_model.h5')
 custom_cascade = cv2.CascadeClassifier("./harcascade_model/cascade/cascade.xml")
 cam = cv2.VideoCapture(0)
 last_signal = 'N'
+placa = 'None'
 # esp = serial.Serial("COM5", 9600)
 
 def preprocessing(img):
@@ -24,45 +25,48 @@ def class_detector(img):
     resultado = model.predict(img)
     indexVal = np.argmax(resultado)
     probabilidade = resultado[0, indexVal]
-    signal = "N"
     
-    if(probabilidade >= 0.90):
+    if(probabilidade >= 0.95):
         classe = indexVal
-    if classe == 0:
-        signal = "1" #20km
-    elif classe == 2:
-        signal = "2" #30km
-    elif classe == 1:
-        signal = "3" #70km
-    elif classe == 3:
-        signal = "4" #80km
-    elif classe == 4:
-        signal = "5" #120km
-    elif classe == 5:
-        signal = "P"  #Stop
-    elif classe == 6:
-        signal = "L" #Esquerda
-    elif classe == 7:
-        signal = "D" #Direita
-    return signal
+
+    match classe:
+        case 0:
+            return "1", "20km"
+        case 1:
+            return "3", "70km"
+        case 2:
+            return "2", "30km"
+        case 3:
+            return "4", "80km"
+        case 4:
+            return "5", "120km"
+        case 5:
+            return "P", "Stop"
+        case 6:
+            return "L", "Esquerda"
+        case 7:
+            return "D", "Direita"
+        case _:
+            return "N", "None" 
 
 while True:
     trafic_sign = []
     ret, img = cam.read()
-    objects = custom_cascade.detectMultiScale(img, minSize=(32, 32),minNeighbors=5)
+    objects = custom_cascade.detectMultiScale(img, minSize=(32, 32),minNeighbors=8,scaleFactor=1.1)
     for (x, y, w, h) in objects:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
         trafic_sign = img[y:y+h, x:x+w]
 
     if(len(trafic_sign) > 1):
-        signal = class_detector(trafic_sign)    
-        print(signal)
-
+        detector = class_detector(trafic_sign)
+        signal = detector[0]
         if(last_signal != signal and signal != "N"):
+            placa = detector[1]
             last_signal = signal
             print(last_signal)
             # esp.write((signal).encode())
 
+    img = cv2.putText(img, placa, (250, 100) , cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0) , 2, cv2.LINE_AA) 
     cv2.imshow('Object Detection', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         cam.release()
