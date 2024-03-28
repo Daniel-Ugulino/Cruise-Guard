@@ -6,6 +6,7 @@ import time
 
 
 def open_cam(port):
+    print("Opening camera")
     try:
         cam = cv2.VideoCapture(port)
         if not cam.isOpened():
@@ -16,6 +17,7 @@ def open_cam(port):
         return None
     
 def load_models():
+    print("Loading Models")
     try:
         model = load_model('classification_model/traffic_sign_model.h5')
         custom_cascade = cv2.CascadeClassifier("./harcascade_model/cascade/cascade.xml")
@@ -25,8 +27,8 @@ def load_models():
         return False, False
      
 def esp_connection():
+    print("Connecting to EPS32")
     try:
-        print("Connecting to EPS32")
         esp = serial.Serial("COM5", 9600, timeout=20)
         print("Connected")
         return esp
