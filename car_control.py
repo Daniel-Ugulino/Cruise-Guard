@@ -99,8 +99,10 @@ if __name__ == "__main__":
                 if(last_signal != signal and signal != "N" or signal == "P"):
                     trafic_sign_text = detector[1]
                     last_signal = signal
-                    if(esp):
+                    if(esp and esp.is_open()):
                         esp.write((signal).encode())
+                    else:
+                        esp = False
 
             img = cv2.putText(img, trafic_sign_text, (250, 100) , cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0) , 2, cv2.LINE_AA) 
 
