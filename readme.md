@@ -8,13 +8,13 @@ Este tem como proposta utilizar tecnologias avançadas, a fim de coordenar e gui
 
 ## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![App Screenshot](https://raw.githubusercontent.com/Daniel-Ugulino/Cruise-Guard/main/Cruise%20Guard_screenshot_28.03.2024.png)
 
 
 ## Datasets e outros arquivos
 
- - [Image Classification Dataset](https://drive.google.com/drive/folders/1LGyen08X7hTLEs6y6viQlZDKpfDJIRmP?usp=sharing)
- - [HarCascade Dataset](https://drive.google.com/drive/folders/1LGyen08X7hTLEs6y6viQlZDKpfDJIRmP?usp=sharing)
+ - [Image Classification Dataset](https://drive.google.com/drive/folders/16nrWDE51dHin1PEi3Pz0crS5II3qxny0?usp=sharing)
+ - [HarCascade Dataset](https://drive.google.com/drive/folders/1YaFl-iK16xFYi3oj0NqT4VLtJrvfAcGX?usp=sharing)
  - [Opencv HarCascade Training Executable](https://drive.google.com/file/d/19mx4Nbubiy1NkYywf0VvlhAigjab1kb5/view?usp=sharing)
 
 ## Bibliotecas
