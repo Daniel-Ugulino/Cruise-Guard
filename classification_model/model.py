@@ -117,7 +117,7 @@ plt.legend(['training', 'validation'])
 plt.title('Loss')
 plt.xlabel('Epoch')
 
-RNC.save('modelo85_v5_test.h5')
+RNC.save('traffic_sign_model.h5')
 print('Modelo Salvo!')
 
 plt.ioff()
