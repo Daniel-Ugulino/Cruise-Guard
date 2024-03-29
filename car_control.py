@@ -25,9 +25,9 @@ def open_cam(port):
 def load_models():
     print("Loading Models")
     try:
-        model = load_model('classification_model/traffic_sign_model.h5')
-        custom_cascade = cv2.CascadeClassifier("./harcascade_model/cascade/cascade.xml")
-        return model, custom_cascade
+        classification_model = load_model('classification_model/traffic_sign_model.h5')
+        object_detection_model = cv2.CascadeClassifier("./harcascade_model/cascade/cascade.xml")
+        return classification_model, object_detection_model
     except Exception as e:
         print(e)
         return False, False
@@ -54,7 +54,7 @@ def class_detector(img):
     img = cv2.resize(img,(64,64))
     img = preprocessing(img)
     img = img.reshape(1,64, 64, 1)
-    result = model.predict(img)
+    result = classification_model.predict(img)
     indexVal = np.argmax(result)
     probability = result[0, indexVal]
     
@@ -87,14 +87,14 @@ if __name__ == "__main__":
     start_time = time.time()
     esp = esp_connection()
     cam = open_cam(0)
-    model, custom_cascade = load_models()
-    if(cam and model and custom_cascade):
+    classification_model, object_detection_model = load_models()
+    if(cam and classification_model and object_detection_model):
         while True:
             current_time = time.time()
             detected_sign = []
             
             ret, img = cam.read()
-            objects = custom_cascade.detectMultiScale(img, minSize=(32, 32),minNeighbors=8)
+            objects = object_detection_model.detectMultiScale(img, minSize=(32, 32),minNeighbors=8)
             for (x, y, w, h) in objects:
                 cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
                 detected_sign = img[y:y+h, x:x+w]
@@ -102,17 +102,20 @@ if __name__ == "__main__":
             if(len(detected_sign) > 1):
                 detector = class_detector(detected_sign)
                 signal = detector[0]
-                if(last_signal != signal and signal != "N" or signal == "P"):
+                if(last_signal != signal and signal != "N" or signal == "S"):
                     trafic_sign_text = detector[1]
                     last_signal = signal
-                    if(esp and check_connection()):
-                        esp.write((signal).encode())
+                    if(esp):
+                        if(esp.is_open):
+                            esp.write((signal).encode())
+                        else:
+                            esp = False
                     else:
                         esp = False
 
             img = cv2.putText(img, trafic_sign_text, (250, 100) , cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0) , 2, cv2.LINE_AA) 
 
-            if((not esp or check_connection()) and (current_time - start_time >= 30)):
+            if(not esp and (current_time - start_time >= 30)):
                 esp = esp_connection()
                 start_time = time.time()
 
