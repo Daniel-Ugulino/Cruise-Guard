@@ -2,9 +2,10 @@ import cv2
 import numpy as np
 from keras.models import load_model
 import os
+import matplotlib.pyplot as plt
 
 testPath = "./tests/"
-model = load_model('./modelo85_v5_test.h5')
+model = load_model('./traffic_sign_model.h5')
 
 
 def preprocessing(img):
@@ -28,34 +29,35 @@ def class_detector(img, img_name):
     
     if classe == 0:
         placa = "20km"
-        signal = "1"
     elif classe == 2:
         placa = "30km"
-        signal = "2"
     elif classe == 1:
         placa = "70km"
-        signal = "3"
     elif classe == 3:
         placa = "80km"
-        signal = "4"
     elif classe == 4:
         placa = "120km"
-        signal = "5"
     elif classe == 5:
         placa = "Stop"
-        signal = "P"
     elif classe == 6:
         placa = "Esquerda"
-        signal = "L"
     elif classe == 7:
         placa = "Direita"
-        signal = "D"
     else:
         placa = "N"
-        signal = "N"
-    print(str(classe) + " placa:" + placa + " arquivo:" + str(img_name))
-    return signal
+    return ("placa:" + placa)
+
+fig = plt.figure(figsize=(10, 7)) 
+row = 1
 
 for img in os.listdir(testPath):
+
+    fig.add_subplot(3, 3, row) 
     Img = cv2.imread("./tests/"+img)
-    class_detector(Img, img)
+    text = class_detector(Img, img)
+    plt.imshow(cv2.cvtColor(Img, cv2.COLOR_BGR2RGB))
+    plt.title(text)
+    plt.axis('off')
+    row += 1
+
+plt.show() 
