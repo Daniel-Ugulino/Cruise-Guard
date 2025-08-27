@@ -14,7 +14,7 @@ def check_connection(esp):
 def open_cam(port):
     print("Opening camera")
     try:
-        cam = cv2.VideoCapture(port)
+        cam = cv2.VideoCapture(port, cv2.CAP_FFMPEG)
         if not cam.isOpened():
             raise IOError(f"Failed to open camera at port {port}")
         return cam
@@ -45,7 +45,12 @@ def esp_connection():
 def preprocessing(img):
     img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)   # Converter em Gray
     img = cv2.equalizeHist(img)   # Padronizar a Luminosidade das imagens
-    img = img/255            # normalizar valores para 0 e 1 em vez de 0 e 255
+    img = img / 255
+    img_uint8 = np.uint8(img * 255)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    img = clahe.apply(img_uint8) / 255.0
+    img = cv2.GaussianBlur(img, (3,3), 0)
+    
     return img
 
 def class_detector(img):
@@ -86,7 +91,7 @@ if __name__ == "__main__":
     trafic_sign_text = 'None'
     start_time = time.time()
     esp = esp_connection()
-    cam = open_cam(0)
+    cam = open_cam('http://192.168.29.81:80/')
     classification_model, object_detection_model = load_models()
     if(cam and classification_model and object_detection_model):
         while True:
