@@ -15,6 +15,8 @@ def open_cam(port):
     print("Opening camera")
     try:
         cam = cv2.VideoCapture(port, cv2.CAP_FFMPEG)
+        cam = cv2.VideoCapture(port)
+
         if not cam.isOpened():
             raise IOError(f"Failed to open camera at port {port}")
         return cam
@@ -25,7 +27,7 @@ def open_cam(port):
 def load_models():
     print("Loading Models")
     try:
-        classification_model = load_model('classification_model/traffic_sign_model.h5')
+        classification_model = load_model('classification_model/traffic_sign_model_2.h5')
         object_detection_model = cv2.CascadeClassifier("./harcascade_model/cascade/cascade.xml")
         return classification_model, object_detection_model
     except Exception as e:
@@ -43,14 +45,33 @@ def esp_connection():
         return False
 
 def preprocessing(img):
-    img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)   # Converter em Gray
-    img = cv2.equalizeHist(img)   # Padronizar a Luminosidade das imagens
-    img = img / 255
-    img_uint8 = np.uint8(img * 255)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    img = clahe.apply(img_uint8) / 255.0
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    img = np.array(255 * (img / 255) ** 0.5, dtype='uint8')
+            
+    img = cv2.resize(img, (64, 64), interpolation=cv2.INTER_CUBIC)
+
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+    img = clahe.apply(img)
+
     img = cv2.GaussianBlur(img, (3,3), 0)
-    
+
+    kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
+    sharpened = cv2.filter2D(img, -1, kernel)
+
+    img = cv2.addWeighted(img, 1.0, sharpened, 0.5, 0)
+
+    img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 7)
+
+    img = cv2.bitwise_not(img)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1,1))
+    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel, iterations=1)
+    img = cv2.dilate(img, kernel, iterations=1)
+    img = cv2.bitwise_not(img)
+
+    img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+    img = np.uint8(img)
+
     return img
 
 def class_detector(img):
@@ -62,7 +83,6 @@ def class_detector(img):
     result = classification_model.predict(img)
     indexVal = np.argmax(result)
     probability = result[0, indexVal]
-    
     if(probability >= 0.95):
         model_class = indexVal
 
@@ -91,7 +111,8 @@ if __name__ == "__main__":
     trafic_sign_text = 'None'
     start_time = time.time()
     esp = esp_connection()
-    cam = open_cam('http://192.168.29.81:80/')
+    cam = open_cam(0)
+    # cam = open_cam('http://192.168.29.81:80/')
     classification_model, object_detection_model = load_models()
     if(cam and classification_model and object_detection_model):
         while True:
@@ -99,7 +120,7 @@ if __name__ == "__main__":
             detected_sign = []
             
             ret, img = cam.read()
-            objects = object_detection_model.detectMultiScale(img, minSize=(32, 32),minNeighbors=8)
+            objects = object_detection_model.detectMultiScale(img, minSize=(64, 64),minNeighbors=8)
             for (x, y, w, h) in objects:
                 cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
                 detected_sign = img[y:y+h, x:x+w]
