@@ -22,7 +22,7 @@ nC= 64
 def preprocessing(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    img = np.array(255 * (img / 255) ** 0.5, dtype='uint8')
+    img = np.array(255 * (img / 255) ** 0.8, dtype='uint8')
             
     img = cv2.resize(img, (64, 64), interpolation=cv2.INTER_CUBIC)
 
@@ -34,18 +34,16 @@ def preprocessing(img):
     kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
     sharpened = cv2.filter2D(img, -1, kernel)
 
-    img = cv2.addWeighted(img, 1.0, sharpened, 0.5, 0)
+    img = cv2.addWeighted(img, 1.0, sharpened, 1.5, 0)
 
     img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 7)
 
     img = cv2.bitwise_not(img)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1,1))
-    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel, iterations=1)
-    img = cv2.dilate(img, kernel, iterations=1)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+    img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=1)  
+    img = cv2.erode(img, kernel, iterations=1)  
+    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel, iterations=2)
     img = cv2.bitwise_not(img)
-
-    img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
-    img = np.uint8(img)
 
     return img
 
@@ -129,7 +127,7 @@ RNC.compile(loss='categorical_crossentropy',optimizer= 'adam',metrics= ['accurac
 
 # Treinamento da rede
 print(RNC.summary())
-history = RNC.fit(dataGen.flow(X_train,y_train, batch_size=32),epochs=80,validation_data=(X_validation,y_validation),shuffle=1)
+history = RNC.fit(dataGen.flow(X_train,y_train, batch_size=200),epochs=80,validation_data=(X_validation,y_validation),shuffle=1)
 
 score = RNC.evaluate(X_test,y_test,verbose=0)
 print('Test Score:',score[0])
@@ -141,7 +139,7 @@ plt.legend(['training', 'validation'])
 plt.title('Loss')
 plt.xlabel('Epoch')
 
-RNC.save('traffic_sign_model_test_06.h5')
+RNC.save('traffic_sign_model_test_09.h5')
 print('Modelo Salvo!')
 
 plt.ioff()
